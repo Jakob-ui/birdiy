@@ -1,14 +1,14 @@
 #include <AccelStepper.h>
 #include <Arduino.h>
+#include <CO2.h>
 
-// Correct: 1-3-2-4 order
-int motor1 = 15;
-int motor2 = 22;
-int motor3 = 23;
-int motor4 = 21;
+int motor1 = 18;
+int motor2 = 20;
+int motor3 = 19;
+int motor4 = 0;
 AccelStepper stepper1(4, motor1, motor2, motor3, motor4);
-int Button = 4;
-int LED = 5;
+int Button = 2;
+int LED = 15;
 int lastButtonState = 0;
 int currentMotorPosition = 0;
 
@@ -16,7 +16,7 @@ void motor(bool mode)
 {
   if (mode == true)
   {
-    digitalWrite(motor1, LOW);
+    digitalWrite(motor1, LOW); 
     digitalWrite(motor2, LOW);
     digitalWrite(motor3, LOW);
     digitalWrite(motor4, LOW);
@@ -32,20 +32,28 @@ void motor(bool mode)
 
 void setup()
 {
-  Serial.begin(9600);
-  pinMode(Button, INPUT);
+  Serial.begin(115200);
+  //bool error = initSensor();
+  //if (error == true){
+  //  Serial.print("Error, couldnt find CO2 Sensor");
+  //  return;
+  //}
+  pinMode(Button, INPUT_PULLUP);
   pinMode(LED, OUTPUT);
   stepper1.setMaxSpeed(200.0);
   stepper1.setAcceleration(200.0);
   stepper1.moveTo(2038);
-}
+  }
 
 void loop()
 {
+  //getCO2();
   stepper1.run();
   int currentButtonState = digitalRead(Button);
   digitalWrite(LED, currentButtonState);
   currentMotorPosition = stepper1.currentPosition();
+  Serial.print("currentButtonState");
+  Serial.println(currentButtonState);
 
   if (currentButtonState == 1 && lastButtonState == 0)
   {

@@ -1,6 +1,6 @@
 #include <AccelStepper.h>
 #include <Arduino.h>
-#include <CO2.h>
+#include "CO2.h"
 
 int motor1 = 18;
 int motor2 = 20;
@@ -11,6 +11,7 @@ int Button = 2;
 int LED = 15;
 int lastButtonState = 0;
 int currentMotorPosition = 0;
+bool success = false;
 
 void motor(bool mode)
 {
@@ -33,11 +34,11 @@ void motor(bool mode)
 void setup()
 {
   Serial.begin(115200);
-  //bool error = initSensor();
-  //if (error == true){
-  //  Serial.print("Error, couldnt find CO2 Sensor");
-  //  return;
-  //}
+  while (success == false)
+  {
+    success = initSensor();
+    Serial.println("Try to find CO2 sensor");
+  }
   pinMode(Button, INPUT_PULLUP);
   pinMode(LED, OUTPUT);
   stepper1.setMaxSpeed(200.0);
@@ -47,13 +48,11 @@ void setup()
 
 void loop()
 {
-  //getCO2();
+  getCO2();
   stepper1.run();
   int currentButtonState = digitalRead(Button);
   digitalWrite(LED, currentButtonState);
   currentMotorPosition = stepper1.currentPosition();
-  Serial.print("currentButtonState");
-  Serial.println(currentButtonState);
 
   if (currentButtonState == 1 && lastButtonState == 0)
   {

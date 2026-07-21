@@ -6,6 +6,7 @@
 #include <SensirionI2cScd4x.h>
 
 bool initSensor();
+bool initZigbee();
 int getCO2();
 
 #endif

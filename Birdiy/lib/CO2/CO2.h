@@ -4,9 +4,11 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <SensirionI2cScd4x.h>
+#include "zigbeeConnection.h"
 
 bool initSensor();
 bool initZigbee();
-int getCO2();
+uint16_t getCO2();
+float getTemp();
 
 #endif

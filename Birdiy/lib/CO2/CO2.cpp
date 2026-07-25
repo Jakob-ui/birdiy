@@ -1,7 +1,5 @@
-#include <CO2.h>
-#include <Zigbee.h>
+#include "CO2.h"
 
-ZigbeeCarbonDioxideSensor CO2Sensor(1);
 SensirionI2cScd4x sensor;
 bool setupRan = false;
 uint16_t co2 = 0;
@@ -10,7 +8,11 @@ float humidity = 0.0f;
 unsigned long lastCo2Read = 0;
 const unsigned long co2ReadInterval = 5000;
 
-bool initSensor(){
+unsigned long lastTempRead = 0;
+const unsigned long tempReadInterval = 5000;
+
+bool initSensor()
+{
     Wire.end();
     Wire.begin();
     Wire.setClock(100000);
@@ -34,33 +36,11 @@ bool initSensor(){
     return true;
 }
 
-bool initZigbee(){
-    if (!setupRan)
-    {
-        Serial.println("Try initialising Sensor");
-        CO2Sensor.setManufacturerAndModel("Birdiy", "Birdiy-CO2-Sensor");
-
-        CO2Sensor.setMinMaxValue(0, 5000);
-        CO2Sensor.setDefaultValue(0);
-        Zigbee.addEndpoint(&CO2Sensor);
-        Serial.println("Starte Zigbee...");
-        if (!Zigbee.begin(ZIGBEE_END_DEVICE))
-        {
-            Serial.println("Zigbee konnte nicht gestartet werden!");
-            ESP.restart();
-            return false;
-        }
-        Serial.println("Zigbee läuft! (Pairing)...");
-        setupRan = true;
-    }
-    return true;
-}
-
-int getCO2()
+bool readMeasurementData()
 {
     if (millis() - lastCo2Read < co2ReadInterval)
     {
-        return co2;
+        return true;
     }
 
     bool dataReady = false;
@@ -68,13 +48,12 @@ int getCO2()
     uint16_t error = sensor.getDataReadyStatus(dataReady);
     if (error)
     {
-        Serial.print("CO2 sensor I2C error: ");
+        Serial.print("Sensor I2C error: ");
         Serial.println(error);
         Wire.end();
         delay(50);
         initSensor();
-        CO2Sensor.setCarbonDioxide(co2);
-        return 0;
+        return false;
     }
 
     if (dataReady)
@@ -83,18 +62,39 @@ int getCO2()
         if (!error)
         {
             Serial.print("CO2: ");
-            Serial.println(co2);
-            CO2Sensor.setCarbonDioxide(co2);
+            Serial.print(co2);
+            Serial.print(" ppm, Temp: ");
+            Serial.println(temperature);
             lastCo2Read = millis();
-            return co2;
+            return true;
         }
 
-        Serial.print("CO2 measurement error: ");
+        Serial.print("Measurement error: ");
         Serial.println(error);
         Wire.end();
         delay(50);
         initSensor();
+        return false;
     }
-    CO2Sensor.setCarbonDioxide(co2);
-    return 0;
+    return false;
+}
+
+uint16_t getCO2()
+{
+    if (readMeasurementData())
+    {
+        return co2;
+    }
+    else
+        return 1;
+}
+
+float getTemp()
+{
+    if (readMeasurementData())
+    {
+        return temperature;
+    }
+    else
+        return 1;
 }

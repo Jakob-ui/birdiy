@@ -5,11 +5,11 @@
 
 int Button = 2;
 int LED = 15;
-int lastButtonState = 0;
 bool sensorSuccess = false;
 bool zigbeeSuccess = false;
 unsigned long lastPublish = 0;
 const unsigned long publishInterval = 10000;
+bool wasConnected = false;
 
 bool errorCheck()
 {
@@ -28,28 +28,68 @@ bool errorCheck()
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(115200); 
   pinMode(Button, INPUT_PULLDOWN);
-  lastButtonState = digitalRead(Button);
-  stepperInit();
   pinMode(LED, OUTPUT);
-  sensorSuccess = initSensor();
-  zigbeeSuccess = initZigbee();
+
+  stepperInit(Button);
+
+  int retries = 10;
+
+  for (int i = 0; i < retries; i++)
+  {
+    sensorSuccess = initSensor();
+    if(sensorSuccess == true){
+      break;
+    }
+    Serial.println("CO2 Init failed, try again... " + String(i) + "x");
+    delay(1000);
+  }
+
+  if (!sensorSuccess)
+  {
+    Serial.println("Error: Co2-Sensor not reachable.");
+    showError(300);
+    while (true);
+  }
+
+  for (int i = 0; i < retries; i++)
+  {
+    zigbeeSuccess = initZigbee();
+    if (zigbeeSuccess == true)
+    {
+      break;
+    }
+    Serial.println("Zigbee Init failed, try again... " + String(i) + "x");
+    delay(1000);
+  }
 }
 
 void loop()
 {
-  if (errorCheck() && Zigbee.connected())
+  if (errorCheck())
   {
-    if (millis() - lastPublish >= publishInterval)
+    if (Zigbee.connected())
     {
-      publishData(getCO2(), getTemp());
-      lastPublish = millis();
+      if (!wasConnected)
+      {
+        Serial.println("Verbunden! Warte auf Abschluss des Interviews...");
+        wasConnected = true;
+        lastPublish = millis();
+      }
+
+      if (millis() - lastPublish >= publishInterval)
+      {
+        publishData(getCO2(), getTemp());
+        lastPublish = millis();
+      }
+    }
+    else
+    {
+      wasConnected = false;
     }
   }
 
   int currentButtonState = digitalRead(Button);
   digitalWrite(LED, !currentButtonState);
-  stepperCheck(currentButtonState, lastButtonState);
-  lastButtonState = currentButtonState;
 }

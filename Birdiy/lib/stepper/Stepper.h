@@ -4,7 +4,9 @@
 #include <Arduino.h>
 #include <AccelStepper.h>
 
-void stepperInit();
-void stepperCheck(int currentButtonState, int lastButtonState);
+bool stepperInit(int buttonPin);
+bool stepperCheck(int buttonPin);
+void stepperSleep(bool state);
+void showError(int errorPosition);
 
 #endif

@@ -7,34 +7,51 @@ int motor4 = 18;
 AccelStepper stepper1(4, motor4, motor2, motor3, motor1);
 int currentMotorPosition = 0;
 
-void stepperInit()
+bool stepperInit(int buttonPin)
 {
     stepper1.setMaxSpeed(200.0);
     stepper1.setAcceleration(200.0);
-    stepper1.setCurrentPosition(0);
-    stepper1.moveTo(2038);
-    currentMotorPosition = stepper1.currentPosition();
-    stepper1.run();
+    stepperSleep(true);
+    return stepperCheck(buttonPin);
 }
 
-void stepperCheck(int currentButtonState, int lastButtonState)
+bool stepperCheck(int buttonPin)
 {
-    stepper1.run();
-    currentMotorPosition = stepper1.currentPosition();
+    stepper1.moveTo(4076);
+    Serial.println("Init stepper homing");
 
-    if (currentButtonState == 1 && lastButtonState == 1)
+    while (digitalRead(buttonPin) == 0)
     {
-        stepper1.stop();
-        stepper1.setCurrentPosition(1);
-        stepper1.moveTo(-1019);
+        stepper1.run();
+
+        if (stepper1.distanceToGo() == 0)
+        {
+            Serial.println("Error no stepper reset point found!");
+            return false;
+        }
     }
-    if (stepper1.currentPosition() == -1019 && currentButtonState == 0 && lastButtonState == 0)
-    {
-        stepper1.stop();
-        stepper1.setCurrentPosition(0);
-    }
-    if (currentButtonState == 0 && lastButtonState == 1 && currentMotorPosition == -1019)
-    {
-        Serial.println(currentMotorPosition);
-    }
+
+    stepper1.stop();
+    stepper1.setCurrentPosition(0);
+    stepper1.moveTo(-1019);
+    stepper1.runToPosition();
+    stepper1.setCurrentPosition(0);
+    currentMotorPosition = 0;
+    stepperSleep(true);
+    return true;
+}
+
+void stepperSleep(bool state)
+{
+    digitalWrite(motor1, !state);
+    digitalWrite(motor2, !state);
+    digitalWrite(motor3, !state);
+    digitalWrite(motor4, !state);
+    Serial.println("motor sleep");
+}
+
+void showError(int errorPosition){
+    stepper1.moveTo(errorPosition);
+    stepper1.runToPosition();
+    stepperSleep(true);
 }

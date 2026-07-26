@@ -34,6 +34,23 @@ bool initSensor()
 
     Serial.println("CO2 Sensor started! Waiting 5s for first reading...");
     return true;
+
+    bool dataReady = false;
+    while (!dataReady)
+    {
+        error = sensor.getDataReadyStatus(dataReady);
+        if (error)
+        {
+            Serial.print("Fehler beim Abfragen des Status: ");
+            Serial.println(error);
+            return false;
+        }
+
+        delay(500);
+    }
+
+    Serial.println("CO2 Sensor ist bereit und hat Daten!");
+    return true;
 }
 
 bool readMeasurementData()

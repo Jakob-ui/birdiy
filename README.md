@@ -10,12 +10,14 @@ This little bird actively monitors your room's CO2 levels and physically drops d
 *   **Zigbee Integration:** Acts as a Zigbee End Device, publishing CO2 and temperature data to your smart home network every 2 minutes.
 *   **Smart Error Handling:** The bird rotates to specific angles to visually indicate hardware issues (e.g., sensor failure or Zigbee connection loss).
 
-## Required hardware
+## Required Hardware
 
-* [Seed Studio esp32-c6](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html)
-* [28BYJ-48 4-Phase Stepper Motor with 5V Drive Board](https://www.amazon.de/Heevhas-28BYJ-48-Schrittmotor-Treiberplatine-Testmodul/dp/B0CW9ST4XM?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&sr=8-1)
-* [SCD41 Sensor Module](https://www.amazon.de/dp/B0FK53SJHB)
-* and a button of some sort :)
+| Component | Notes |
+|---|---|
+| [Seeed Studio XIAO ESP32-C6](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html) | Microcontroller with Zigbee support |
+| [28BYJ-48 4-Phase Stepper Motor + 5V driver board](https://www.amazon.de/Heevhas-28BYJ-48-Schrittmotor-Treiberplatine-Testmodul/dp/B0CW9ST4XM) | Drives the bird's tilting motion |
+| [SCD41 Sensor Module](https://www.amazon.de/dp/B0FK53SJHB) | CO₂, temperature & humidity sensor |
+| A button of some sort | e.g. for manual reset/calibration :) |
 
 ## Wiring Diagramm
 
@@ -23,8 +25,17 @@ Picture coming soon
 
 ## Software & Installation
 
-This project is built using [PlatformIO](https://platformio.org/). 
-Make sure you have PlatformIO installed in VS Code. Clone this repository, open the folder in VS Code, and PlatformIO will automatically download the required libraries defined in the `platformio.ini` file (such as `AccelStepper` and the `Sensirion I2C SCD4x` library).
+This project is built with [PlatformIO](https://platformio.org/).
+
+1. Install the [PlatformIO extension](https://platformio.org/install/ide?install=vscode) for VS Code.
+2. Clone this repository:
+   ```bash
+   git clone https://github.com/<your-username>/bir-diy.git
+   ```
+3. Open the folder in VS Code — PlatformIO will automatically download the required libraries listed in `platformio.ini`, including:
+   - [`AccelStepper`](https://www.arduino.cc/reference/en/libraries/accelstepper/)
+   - [`Sensirion I2C SCD4x`](https://github.com/Sensirion/arduino-i2c-scd4x)
+4. Build and flash the firmware to your ESP32-C6 via PlatformIO.
 
 ## 3D Printed Parts
 

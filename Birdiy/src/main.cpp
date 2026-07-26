@@ -3,32 +3,21 @@
 #include "Stepper.h"
 #include "zigbeeConnection.h"
 
-int Button = 2;
-int LED = 15;
+const int Button = 2;
+const int LED = 15;
 bool sensorSuccess = false;
 bool zigbeeSuccess = false;
 unsigned long lastPublish = 0;
-const unsigned long publishInterval = 10000;
+const unsigned long publishInterval = 120000;
 bool wasConnected = false;
 
-bool errorCheck()
-{
-  if (!sensorSuccess)
-  {
-    sensorSuccess = initSensor();
-  }
-
-  if (sensorSuccess && !zigbeeSuccess)
-  {
-    zigbeeSuccess = initZigbee();
-  }
-
-  return sensorSuccess && zigbeeSuccess;
-}
+//For zigbee connect try if router gets restartet
+unsigned long lastZigbeeRetry = 0;
+const unsigned long zigbeeRetryInterval = 86400000;
 
 void setup()
 {
-  Serial.begin(115200); 
+  Serial.begin(115200);
   pinMode(Button, INPUT_PULLDOWN);
   pinMode(LED, OUTPUT);
 
@@ -36,59 +25,55 @@ void setup()
 
   int retries = 10;
 
-  for (int i = 0; i < retries; i++)
-  {
-    sensorSuccess = initSensor();
-    if(sensorSuccess == true){
-      break;
-    }
-    Serial.println("CO2 Init failed, try again... " + String(i) + "x");
-    delay(1000);
-  }
+  sensorSuccess = tryInitSensor(10);
 
   if (!sensorSuccess)
   {
     Serial.println("Error: Co2-Sensor not reachable.");
     showError(300);
-    while (true);
+    delay(10000);
+    ESP.restart();
   }
 
-  for (int i = 0; i < retries; i++)
+  zigbeeSuccess = tryInitZigbee(10);
+
+  if (!zigbeeSuccess)
   {
-    zigbeeSuccess = initZigbee();
-    if (zigbeeSuccess == true)
-    {
-      break;
-    }
-    Serial.println("Zigbee Init failed, try again... " + String(i) + "x");
-    delay(1000);
+    Serial.println("Zigbee error");
   }
 }
 
 void loop()
 {
-  if (errorCheck())
+  //Zigbee daily retry in case of router restart
+  if (millis() - lastZigbeeRetry >= zigbeeRetryInterval)
   {
-    if (Zigbee.connected())
+    Serial.println("Täglicher Zigbee-Reconnect-Versuch...");
+    zigbeeSuccess = tryInitZigbee(1);
+    lastZigbeeRetry = millis();
+  }
+
+    if (millis() - lastPublish >= publishInterval)
     {
-      if (!wasConnected)
+      uint16_t currentCO2 = getCO2();
+      publishData(currentCO2, getTemp());
+
+      if (currentCO2 == 0)
       {
-        Serial.println("Verbunden! Warte auf Abschluss des Interviews...");
-        wasConnected = true;
-        lastPublish = millis();
+        Serial.println("Warning: I2C Error");
+        showError(300);
+      }
+      else if (currentCO2 >= 1000)
+      {
+        setBirdPosition(true);
+      }
+      else
+      {
+        setBirdPosition(false);
       }
 
-      if (millis() - lastPublish >= publishInterval)
-      {
-        publishData(getCO2(), getTemp());
-        lastPublish = millis();
-      }
+      lastPublish = millis();
     }
-    else
-    {
-      wasConnected = false;
-    }
-  }
 
   int currentButtonState = digitalRead(Button);
   digitalWrite(LED, !currentButtonState);

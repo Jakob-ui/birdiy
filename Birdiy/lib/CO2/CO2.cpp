@@ -5,57 +5,64 @@ bool setupRan = false;
 uint16_t co2 = 0;
 float temperature = 0.0f;
 float humidity = 0.0f;
-unsigned long lastCo2Read = 0;
-const unsigned long co2ReadInterval = 5000;
+unsigned long lastRead = 0;
+const unsigned long readInterval = 60000;
 
-unsigned long lastTempRead = 0;
-const unsigned long tempReadInterval = 5000;
-
-bool initSensor()
+bool tryInitSensor(int retries)
 {
-    Wire.end();
-    Wire.begin();
-    Wire.setClock(100000);
-    sensor.begin(Wire, 0x62);
-
-    uint16_t error = sensor.stopPeriodicMeasurement();
-    if (error)
+    if (!setupRan)
     {
-        Serial.println("Error stopping measurement");
-        return false;
-    }
-
-    error = sensor.startPeriodicMeasurement();
-    if (error)
-    {
-        Serial.println("Error starting measurement");
-        return false;
-    }
-
-    Serial.println("CO2 Sensor started! Waiting 5s for first reading...");
-    return true;
-
-    bool dataReady = false;
-    while (!dataReady)
-    {
-        error = sensor.getDataReadyStatus(dataReady);
-        if (error)
+        for (int i = 0; i < retries; i++)
         {
-            Serial.print("Fehler beim Abfragen des Status: ");
-            Serial.println(error);
-            return false;
+            Wire.end();
+            Wire.begin();
+            Wire.setClock(100000);
+            sensor.begin(Wire, 0x62);
+            Serial.println("Try initialising CO2 Sensor " + String(i) + "x");
+
+            uint16_t error = sensor.stopPeriodicMeasurement();
+            if (error)
+            {
+                Serial.println("Error stopping measurement");
+                continue;
+            }
+
+            error = sensor.startPeriodicMeasurement();
+            if (error)
+            {
+                Serial.println("Error starting measurement");
+                continue;
+            }
+
+            Serial.println("CO2 Sensor started! Waiting 5s for first reading...");
+            return true;
+
+            bool dataReady = false;
+            while (!dataReady)
+            {
+                error = sensor.getDataReadyStatus(dataReady);
+                if (error)
+                {
+                    Serial.print("Fehler beim Abfragen des Status: ");
+                    Serial.println(error);
+                    continue;
+                }
+
+                delay(500);
+            }
+
+            Serial.println("CO2 Sensor ist bereit und hat Daten!");
+            setupRan = true;
+            return true;
         }
-
-        delay(500);
+        return false;
     }
-
-    Serial.println("CO2 Sensor ist bereit und hat Daten!");
     return true;
 }
 
 bool readMeasurementData()
 {
-    if (millis() - lastCo2Read < co2ReadInterval)
+    if (millis() - lastRead < readInterval)
     {
         return true;
     }
@@ -69,7 +76,7 @@ bool readMeasurementData()
         Serial.println(error);
         Wire.end();
         delay(50);
-        initSensor();
+        tryInitSensor(2);
         return false;
     }
 
@@ -82,7 +89,7 @@ bool readMeasurementData()
             Serial.print(co2);
             Serial.print(" ppm, Temp: ");
             Serial.println(temperature);
-            lastCo2Read = millis();
+            lastRead = millis();
             return true;
         }
 
@@ -90,7 +97,7 @@ bool readMeasurementData()
         Serial.println(error);
         Wire.end();
         delay(50);
-        initSensor();
+        tryInitSensor(3);
         return false;
     }
     return false;
@@ -103,7 +110,7 @@ uint16_t getCO2()
         return co2;
     }
     else
-        return 1;
+        return 0;
 }
 
 float getTemp()
@@ -113,5 +120,5 @@ float getTemp()
         return temperature;
     }
     else
-        return 1;
+        return 0;
 }

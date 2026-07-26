@@ -6,7 +6,7 @@
 #include <SensirionI2cScd4x.h>
 #include "zigbeeConnection.h"
 
-bool initSensor();
+bool tryInitSensor(int retries);
 bool initZigbee();
 uint16_t getCO2();
 float getTemp();

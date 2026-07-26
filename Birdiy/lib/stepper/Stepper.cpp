@@ -1,9 +1,9 @@
 #include "Stepper.h"
 
-int motor1 = 17;
-int motor2 = 19;
-int motor3 = 20;
-int motor4 = 18;
+const int motor1 = 17;
+const int motor2 = 19;
+const int motor3 = 20;
+const int motor4 = 18;
 AccelStepper stepper1(4, motor4, motor2, motor3, motor1);
 int currentMotorPosition = 0;
 
@@ -41,16 +41,32 @@ bool stepperCheck(int buttonPin)
     return true;
 }
 
+void setBirdPosition(bool state)
+{
+    if (state && stepper1.currentPosition() != 1010)
+    {
+        stepper1.moveTo(1010);
+        stepper1.runToPosition();
+        stepperSleep(true);
+    }
+    else if (!state && stepper1.currentPosition() != 0)
+    {
+        stepper1.moveTo(0);
+        stepper1.runToPosition();
+        stepperSleep(true);
+    }
+}
+
 void stepperSleep(bool state)
 {
     digitalWrite(motor1, !state);
     digitalWrite(motor2, !state);
     digitalWrite(motor3, !state);
     digitalWrite(motor4, !state);
-    Serial.println("motor sleep");
 }
 
-void showError(int errorPosition){
+void showError(int errorPosition)
+{
     stepper1.moveTo(errorPosition);
     stepper1.runToPosition();
     stepperSleep(true);

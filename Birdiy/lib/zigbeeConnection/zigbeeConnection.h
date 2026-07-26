@@ -4,6 +4,6 @@
 #include <Zigbee.h>
 
 void publishData(uint16_t co2, float temp);
-bool initZigbee();
+bool tryInitZigbee(int retries);
 
 #endif

@@ -19,6 +19,19 @@ This little bird actively monitors your room's CO2 levels and physically drops d
 | [SCD41 Sensor Module](https://www.amazon.de/dp/B0FK53SJHB) | CO₂, temperature & humidity sensor |
 | A button of some sort | e.g. for manual reset/calibration :) |
 
+## Pin Connections
+
+| Pin | Used for |
+|---|---|
+| GPIO 2 | Button (homing/reset, `INPUT_PULLDOWN`) |
+| GPIO 17 | Stepper motor coil 1 |
+| GPIO 19 | Stepper motor coil 2 |
+| GPIO 20 | Stepper motor coil 3 |
+| GPIO 18 | Stepper motor coil 4 |
+| GPIO 22 (SDA) / GPIO 23 (SCL) | SCD41 CO₂ sensor (I2C, default board pins, address `0x62`) |
+
+![esp32_c6_pinout](esp32_c6_pinout.png)
+[Quelle Seeed Studio](https://wiki.seeedstudio.com/xiao_esp32c6_getting_started/#front)
 ## Software & Installation
 
 This project is built with [PlatformIO](https://platformio.org/).
@@ -33,7 +46,7 @@ This project is built with [PlatformIO](https://platformio.org/).
    - [`Sensirion I2C SCD4x`](https://github.com/Sensirion/arduino-i2c-scd4x)
 4. Build and flash the firmware to your ESP32-C6 via PlatformIO.
 
-## 3D Printed Parts
+## 3D Parts
 
 *(Coming soon!)* 
-All STL files required to build the bird and the housing will be available here: [Link to 3D files]()
+All files required to build the bird and the housing are available here: [Link to 3D files](https://www.thingiverse.com/thing:7398266)

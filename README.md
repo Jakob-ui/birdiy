@@ -19,10 +19,6 @@ This little bird actively monitors your room's CO2 levels and physically drops d
 | [SCD41 Sensor Module](https://www.amazon.de/dp/B0FK53SJHB) | CO₂, temperature & humidity sensor |
 | A button of some sort | e.g. for manual reset/calibration :) |
 
-## Wiring Diagramm
-
-Picture coming soon
-
 ## Software & Installation
 
 This project is built with [PlatformIO](https://platformio.org/).
@@ -30,7 +26,7 @@ This project is built with [PlatformIO](https://platformio.org/).
 1. Install the [PlatformIO extension](https://platformio.org/install/ide?install=vscode) for VS Code.
 2. Clone this repository:
    ```bash
-   git clone https://github.com/<your-username>/bir-diy.git
+   https://github.com/Jakob-ui/birdiy.git
    ```
 3. Open the folder in VS Code — PlatformIO will automatically download the required libraries listed in `platformio.ini`, including:
    - [`AccelStepper`](https://www.arduino.cc/reference/en/libraries/accelstepper/)

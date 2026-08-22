@@ -5,12 +5,17 @@ const int motor2 = 19;
 const int motor3 = 20;
 const int motor4 = 18;
 AccelStepper stepper1(4, motor4, motor2, motor3, motor1);
+float motorSpeed = 40.0;
+float motorAccel = 200.0;
 int currentMotorPosition = 0;
+int upPosition = 1080;
+int downPosition = 1000;
+
 
 bool stepperInit(int buttonPin)
 {
-    stepper1.setMaxSpeed(200.0);
-    stepper1.setAcceleration(200.0);
+    stepper1.setMaxSpeed(motorSpeed);
+    stepper1.setAcceleration(motorAccel);
     stepperSleep(true);
     return stepperCheck(buttonPin);
 }
@@ -33,7 +38,7 @@ bool stepperCheck(int buttonPin)
 
     stepper1.stop();
     stepper1.setCurrentPosition(0);
-    stepper1.moveTo(-1019);
+    stepper1.moveTo(-upPosition);
     stepper1.runToPosition();
     stepper1.setCurrentPosition(0);
     currentMotorPosition = 0;
@@ -43,9 +48,9 @@ bool stepperCheck(int buttonPin)
 
 void setBirdPosition(bool state)
 {
-    if (state && stepper1.currentPosition() != 1010)
+    if (state && stepper1.currentPosition() != downPosition)
     {
-        stepper1.moveTo(1010);
+        stepper1.moveTo(downPosition);
         stepper1.runToPosition();
         stepperSleep(true);
     }

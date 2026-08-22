@@ -10,6 +10,7 @@ bool zigbeeSuccess = false;
 unsigned long lastPublish = 0;
 const unsigned long publishInterval = 120000;
 bool wasConnected = false;
+int co2Threshold = 1000;
 
 //For zigbee connect try if router gets restartet
 unsigned long lastZigbeeRetry = 0;
@@ -48,7 +49,7 @@ void loop()
   //Zigbee daily retry in case of router restart
   if (millis() - lastZigbeeRetry >= zigbeeRetryInterval)
   {
-    Serial.println("Täglicher Zigbee-Reconnect-Versuch...");
+    Serial.println("Daily Zigbee-Reconnect-Versuch...");
     zigbeeSuccess = tryInitZigbee(1);
     lastZigbeeRetry = millis();
   }
@@ -63,7 +64,7 @@ void loop()
         Serial.println("Warning: I2C Error");
         showError(300);
       }
-      else if (currentCO2 >= 1000)
+      else if (currentCO2 >= co2Threshold)
       {
         setBirdPosition(true);
       }

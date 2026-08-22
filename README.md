@@ -32,6 +32,29 @@ This little bird actively monitors your room's CO2 levels and physically drops d
 
 ![esp32_c6_pinout](esp32_c6_pinout.png)
 [Quelle Seeed Studio](https://wiki.seeedstudio.com/xiao_esp32c6_getting_started/#front)
+
+## Configuration
+
+The bird's behavior can be tuned by editing a few variables in the source code:
+
+### Motor position & movement (`lib/stepper/Stepper.cpp`)
+
+| Variable | Line | Default | Description |
+|---|---|---|---|
+| `motorSpeed` | 8 | `40.0` | Max stepper speed (steps/sec) |
+| `motorAccel` | 9 | `200.0` | Stepper acceleration (steps/sec²) |
+| `upPosition` | 10 | `1080` | Steps used for the homing move to reach the resting (up) position |
+| `downPosition` | 11 | `1000` | Steps to move to for the "bird dropped" (down) position |
+
+
+### Timing & thresholds (`src/main.cpp`)
+
+| Variable | Line | Default | Description |
+|---|---|---|---|
+| `publishInterval` | 11 | `120000` (2 min) | How often CO2/temperature data is measured and published to Zigbee |
+| `zigbeeRetryInterval` | 16 | `86400000` (24 h) | How often to retry the Zigbee connection if it's down |
+| `co2Threshold` | 13 | `1000` ppm | CO2 level (in `loop()`, `currentCO2 >= 1000`) above which the bird drops down |
+
 ## Software & Installation
 
 This project is built with [PlatformIO](https://platformio.org/).
@@ -48,5 +71,4 @@ This project is built with [PlatformIO](https://platformio.org/).
 
 ## 3D Parts
 
-*(Coming soon!)* 
 All files required to build the bird and the housing are available here: [Link to 3D files](https://www.thingiverse.com/thing:7398266)

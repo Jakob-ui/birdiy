@@ -35,7 +35,7 @@ bool tryInitSensor(int retries)
             }
 
             Serial.println("CO2 Sensor started! Waiting 5s for first reading...");
-            return true;
+            delay(5000);
 
             bool dataReady = false;
             while (!dataReady)

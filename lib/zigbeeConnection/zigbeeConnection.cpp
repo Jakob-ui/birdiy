@@ -54,8 +54,17 @@ bool tryInitZigbee(int retries)
 void publishData(uint16_t co2, float temp)
 {
     if (!Zigbee.connected())
+    {
+        Serial.println("W: Zigbee not yet connected");
         return;
+    }
+    if (co2 == 0)
+    {
+        Serial.println("W: CO2 was 0, skipping zigbee publish");
+        return;
+    }
 
+    Serial.println("Updating zigbee data");
     CO2Sensor.setCarbonDioxide(co2);
     CO2Sensor.report();
 

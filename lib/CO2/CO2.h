@@ -7,7 +7,6 @@
 #include "zigbeeConnection.h"
 
 bool tryInitSensor(int retries);
-bool initZigbee();
 uint16_t getCO2();
 float getTemp();
 
